@@ -31,7 +31,7 @@ export default function SavedPostsScreen() {
     try {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       const userData = userDoc.data();
-      const savedPostIds = userData?.savedPosts || [];
+      const savedPostIds = (userData?.savedPosts || []).reverse();
 
       const savedPosts: Post[] = [];
       for (const postId of savedPostIds) {

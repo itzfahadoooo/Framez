@@ -31,7 +31,7 @@ export default function LikedPostsScreen() {
     try {
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       const userData = userDoc.data();
-      const likedPostIds = userData?.likedPosts || [];
+      const likedPostIds = (userData?.likedPosts || []).reverse();
 
       const likedPosts: Post[] = [];
       for (const postId of likedPostIds) {
