@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import MaskedView from "@react-native-masked-view/masked-view";
 import { useAuth } from "../../src/context/AuthContext";
 
 export default function TabLayout() {
@@ -20,7 +22,6 @@ export default function TabLayout() {
     if (!loading && !user) {
       console.log("🚨 TabLayout - NO USER DETECTED! Redirecting to login...");
 
-      // Redirect to login
       try {
         router.replace("/(auth)/login");
         console.log("✅ TabLayout - Redirect command sent");
@@ -39,7 +40,14 @@ export default function TabLayout() {
     console.log("⏳ TabLayout Render - Loading...");
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#000" />
+        <LinearGradient
+          colors={['#F58529', '#DD2A7B', '#8134AF', '#515BD4']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.loadingGradient}
+        >
+          <ActivityIndicator size="large" color="#fff" />
+        </LinearGradient>
       </View>
     );
   }
@@ -51,7 +59,14 @@ export default function TabLayout() {
     );
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#000" />
+        <LinearGradient
+          colors={['#F58529', '#DD2A7B', '#8134AF', '#515BD4']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.loadingGradient}
+        >
+          <ActivityIndicator size="large" color="#fff" />
+        </LinearGradient>
       </View>
     );
   }
@@ -62,13 +77,16 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#000",
-        tabBarInactiveTintColor: "#999",
+        tabBarActiveTintColor: "#262626",
+        tabBarInactiveTintColor: "#8E8E8E",
         tabBarShowLabel: false,
         tabBarStyle: {
           borderTopWidth: 1,
           borderTopColor: "#DBDBDB",
-          height: 50,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+          backgroundColor: '#fff',
         },
       }}
     >
@@ -77,11 +95,26 @@ export default function TabLayout() {
         options={{
           title: "Feed",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "home" : "home-outline"}
-              size={28}
-              color={color}
-            />
+            <View style={styles.tabIconContainer}>
+              {focused ? (
+                <MaskedView
+                  maskElement={
+                    <Ionicons name="home" size={28} color="#000" />
+                  }
+                >
+                  <LinearGradient
+                    colors={['#F58529', '#DD2A7B', '#8134AF', '#515BD4']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.tabIconGradient}
+                  >
+                    <Ionicons name="home" size={28} style={{ opacity: 0 }} />
+                  </LinearGradient>
+                </MaskedView>
+              ) : (
+                <Ionicons name="home-outline" size={28} color={color} />
+              )}
+            </View>
           ),
         }}
       />
@@ -90,11 +123,26 @@ export default function TabLayout() {
         options={{
           title: "Search",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "search" : "search-outline"}
-              size={28}
-              color={color}
-            />
+            <View style={styles.tabIconContainer}>
+              {focused ? (
+                <MaskedView
+                  maskElement={
+                    <Ionicons name="search" size={28} color="#000" />
+                  }
+                >
+                  <LinearGradient
+                    colors={['#F58529', '#DD2A7B', '#8134AF', '#515BD4']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.tabIconGradient}
+                  >
+                    <Ionicons name="search" size={28} style={{ opacity: 0 }} />
+                  </LinearGradient>
+                </MaskedView>
+              ) : (
+                <Ionicons name="search-outline" size={28} color={color} />
+              )}
+            </View>
           ),
         }}
       />
@@ -103,11 +151,22 @@ export default function TabLayout() {
         options={{
           title: "Create",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "add-circle" : "add-circle-outline"}
-              size={28}
-              color={color}
-            />
+            <View style={styles.tabIconContainer}>
+              {focused ? (
+                <LinearGradient
+                  colors={['#F58529', '#DD2A7B', '#8134AF', '#515BD4']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.createButtonGradient}
+                >
+                  <Ionicons name="add" size={32} color="#fff" />
+                </LinearGradient>
+              ) : (
+                <View style={styles.createButtonOutline}>
+                  <Ionicons name="add-circle-outline" size={28} color={color} />
+                </View>
+              )}
+            </View>
           ),
         }}
       />
@@ -116,11 +175,26 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "person" : "person-outline"}
-              size={28}
-              color={color}
-            />
+            <View style={styles.tabIconContainer}>
+              {focused ? (
+                <MaskedView
+                  maskElement={
+                    <Ionicons name="person" size={28} color="#000" />
+                  }
+                >
+                  <LinearGradient
+                    colors={['#F58529', '#DD2A7B', '#8134AF', '#515BD4']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.tabIconGradient}
+                  >
+                    <Ionicons name="person" size={28} style={{ opacity: 0 }} />
+                  </LinearGradient>
+                </MaskedView>
+              ) : (
+                <Ionicons name="person-outline" size={28} color={color} />
+              )}
+            </View>
           ),
         }}
       />
@@ -146,5 +220,47 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
+  },
+  loadingGradient: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: '#DD2A7B',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  tabIconContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  tabIconGradient: {
+    width: 28,
+    height: 28,
+  },
+  createButtonGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: '#DD2A7B',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  createButtonOutline: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -1,16 +1,19 @@
+import Constants from 'expo-constants';
+
 export interface CloudinaryConfig {
   cloudName: string;
   uploadPreset: string;
   apiUrl: string;
 }
 
-// ✅ Get Cloudinary config from environment variables
-const cloudName = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
-const uploadPreset = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+// ✅ Get Cloudinary config from Constants instead of process.env
+const cloudName = Constants.expoConfig?.extra?.cloudinaryCloudName;
+const uploadPreset = Constants.expoConfig?.extra?.cloudinaryUploadPreset;
 
 // ✅ Validate required config
 if (!cloudName || !uploadPreset) {
-  throw new Error('Cloudinary configuration is missing. Check your .env file.');
+  console.error('Cloudinary config:', { cloudName, uploadPreset });
+  throw new Error('Cloudinary configuration is missing. Check your app.config.ts and .env file.');
 }
 
 export const CLOUDINARY_CONFIG: CloudinaryConfig = {
