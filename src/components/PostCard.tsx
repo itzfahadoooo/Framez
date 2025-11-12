@@ -16,6 +16,7 @@ import {
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   FlatList,
   Image,
@@ -34,12 +35,14 @@ import { db } from "../config/firebase";
 import { useAuth } from "../context/AuthContext";
 import { checkIfFollowing, toggleFollow } from "../services/followService";
 import { toggleBookmark, toggleLike } from "../services/likeService";
+import { deletePost } from "../services/postService";
 import { Post } from "../types";
 
 const { width } = Dimensions.get("window");
 
 interface PostCardProps {
   post: Post;
+  onPostDeleted?: (postId: string) => void;
 }
 
 interface Comment {
@@ -51,7 +54,7 @@ interface Comment {
   createdAt: string;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, onPostDeleted }) => {
   const { user } = useAuth();
   const router = useRouter();
   const [liked, setLiked] = useState<boolean>(false);
@@ -69,6 +72,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [checkingFollowStatus, setCheckingFollowStatus] = useState(false);
+  const [deletingPost, setDeletingPost] = useState(false);
 
   const [postUserData, setPostUserData] = useState<{
     displayName: string;
@@ -274,6 +278,50 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
     }
   };
 
+  const handleDeletePost = async () => {
+    if (!user || deletingPost) return;
+
+    Alert.alert(
+      "Delete Post",
+      "Are you sure you want to delete this post? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setDeletingPost(true);
+              setShowActionMenu(false);
+
+              const result = await deletePost(post.id, user.uid);
+
+              if (result.success) {
+                // Call the callback to remove the post from the list
+                if (onPostDeleted) {
+                  onPostDeleted(post.id);
+                }
+              } else {
+                Alert.alert(
+                  "Error",
+                  "Failed to delete post. Please try again."
+                );
+              }
+            } catch (error) {
+              console.error("Error deleting post:", error);
+              Alert.alert("Error", "Failed to delete post. Please try again.");
+            } finally {
+              setDeletingPost(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleViewProfile = () => {
     setShowActionMenu(false);
     router.push(`/user/${post.userId}`);
@@ -323,6 +371,15 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
       </View>
     </View>
   );
+
+  if (deletingPost) {
+    return (
+      <View style={[styles.container, styles.deletingContainer]}>
+        <ActivityIndicator size="large" color="#DD2A7B" />
+        <Text style={styles.deletingText}>Deleting post...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -668,6 +725,29 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                       </Text>
                     </TouchableOpacity>
 
+                    {isOwnPost && (
+                      <>
+                        <TouchableOpacity
+                          style={styles.actionMenuItem}
+                          onPress={handleDeletePost}
+                          disabled={deletingPost}
+                        >
+                          <Ionicons
+                            name="trash-outline"
+                            size={22}
+                            color="#ED4956"
+                          />
+                          <Text
+                            style={[styles.actionMenuText, styles.deleteText]}
+                          >
+                            {deletingPost ? "Deleting..." : "Delete Post"}
+                          </Text>
+                        </TouchableOpacity>
+
+                        <View style={styles.actionMenuDivider} />
+                      </>
+                    )}
+
                     <View style={styles.actionMenuDivider} />
 
                     <TouchableOpacity
@@ -691,6 +771,17 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 10,
     backgroundColor: "#fff",
+  },
+  deletingContainer: {
+    paddingVertical: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  deletingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#8E8E8E",
+    fontWeight: "600",
   },
   header: {
     flexDirection: "row",
@@ -1017,6 +1108,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   unfollowText: {
+    color: "#ED4956",
+  },
+  deleteText: {
     color: "#ED4956",
   },
   cancelText: {

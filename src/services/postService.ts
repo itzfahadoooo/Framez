@@ -7,7 +7,8 @@ import {
   where,
   doc,
   updateDoc,
-  increment
+  increment,
+  writeBatch
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Post, PostResult, PostsResult } from '../types';
@@ -81,5 +82,39 @@ export const getUserPosts = async (userId: string): Promise<PostsResult> => {
   } catch (error: any) {
     console.error('Error getting user posts:', error);
     return { success: false, error: error.message, posts: [] };
+  }
+};
+
+export const deletePost = async (
+  postId: string,
+  userId: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const batch = writeBatch(db);
+    
+    // Delete the post document
+    const postRef = doc(db, 'posts', postId);
+    batch.delete(postRef);
+    
+    // Delete all comments in the post
+    const commentsRef = collection(db, 'posts', postId, 'comments');
+    const commentsSnapshot = await getDocs(commentsRef);
+    commentsSnapshot.forEach((commentDoc) => {
+      batch.delete(commentDoc.ref);
+    });
+    
+    // Update user's post count
+    const userRef = doc(db, 'users', userId);
+    batch.update(userRef, {
+      postsCount: increment(-1)
+    });
+    
+    // Commit all changes
+    await batch.commit();
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting post:', error);
+    return { success: false, error: error.message };
   }
 };
